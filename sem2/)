@@ -1,0 +1,217 @@
+//        long startTime, endTime;
+//        List<List<Long> > p310=new ArrayList<>();
+//        for (int i = 0; i < 10000; i++) {
+//            startTime=0; endTime=0;
+//            startTime = System.nanoTime();// Зафиксируем время перед вставкой
+//
+//            binomialHeap.insert(array.get(i));
+//
+//            endTime = System.nanoTime(); // Зафиксируем время после вставки
+//            long insertionTime = endTime - startTime; // Рассчитаем время выполнения вставки
+//            long operationCountInsert=binomialHeap.getOperationCountInsert();
+//            p310.add(List.of(insertionTime, operationCountInsert));
+//
+//        }
+//        List<List<Long> > p4=new ArrayList<>();
+//        for (int i = 0; i < 1000; i++) {
+//            startTime=0; endTime=0;
+//            startTime = System.nanoTime();// Зафиксируем время перед вставкой
+//
+//            binomialHeap.search(binomialHeap.getElementByIndex(random.nextInt(9999)+1));
+//
+//            endTime = System.nanoTime(); // Зафиксируем время после вставки
+//            long insertionTime = endTime - startTime; // Рассчитаем время выполнения вставки
+//            long operationCountInsert=binomialHeap.getOperationCountSearch();
+//            p4.add(List.of(insertionTime, operationCountInsert));
+//        }
+//
+//        List<List<Long> > p5=new ArrayList<>();
+//        for (int i = 0; i < 1000; i++) {
+//            startTime=0; endTime=0;
+//            startTime = System.nanoTime();// Зафиксируем время перед вставкой
+//
+//            BinomialHeap.Node<Integer> node=binomialHeap
+//                    .search(binomialHeap
+//                            .getElementByIndex(random.nextInt(9000)+1));
+//            binomialHeap.delete(node);
+//
+//            endTime = System.nanoTime(); // Зафиксируем время после вставки
+//            long insertionTime = endTime - startTime; // Рассчитаем время выполнения вставки
+//            long operationCountInsert=binomialHeap.getOperationCountDelete();
+//
+//            p5.add(List.of(insertionTime, operationCountInsert));
+//        }
+
+
+
+
+package sem2;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+
+public class Test {
+    public static void main(String[] args) {
+        Random random = new Random();
+        Array arrayTest = new Array();
+        List<Integer> array = arrayTest.createArray();
+        BinomialHeap<Integer> binomialHeap = new BinomialHeap<>();
+
+        List<List<Long>> p3 = performInsertion(10000, binomialHeap, i ->binomialHeap.insert(array.get(i)));
+
+        List<List<Long>> p4=performInsertion(100,binomialHeap, i -> binomialHeap.search((array.get(random.nextInt(array.size()))))); //(array.get(random.nextInt(array.size())) получаю рандомный элемент из массива
+
+        List<List<Long>> p5=performInsertion(1000, binomialHeap, i
+                -> {int randomInt=random.nextInt(array.size());
+                    BinomialHeap.Node<Integer> node=binomialHeap.search(array.get(randomInt));
+                    array.remove(randomInt);
+                    if (node != null) {
+                        binomialHeap.delete(node);
+                    }
+        });
+
+        write(p3,"fileP3");
+        write(p4,"fileP4");
+        write(p5,"fileP5");
+
+        System.out.println(Arrays.toString(getMidle(p3)));
+        System.out.println(Arrays.toString(getMidle(p4)));
+        System.out.println(Arrays.toString(getMidle(p5)));
+    }
+
+    public static List<List<Long>> performInsertion(int count, BinomialHeap<Integer> binomialHeap, Consumer<Integer> insertionOperation) {
+        List<List<Long>> p = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            long startTime = System.nanoTime();
+            insertionOperation.accept(i);
+            long endTime = System.nanoTime();
+            long Time = endTime - startTime;
+            long operationCountInsert = binomialHeap.getOperationCountDelete();
+            p.add(List.of(Time, operationCountInsert));
+        }
+        return p;
+    }
+    public static double[] getMidle(List<List<Long>> array){
+        double sumX = 0;
+        double sumY = 0;
+        for (List<Long> pair : array) {
+            sumX += pair.get(0);
+            sumY += pair.get(1);
+        }
+        double midX = sumX / array.size();
+        double midY = sumY / array.size();
+
+        return new double[]{midX, midY};
+    }
+    public static void write(List<List<Long>> data, String file){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))){
+            for (int i = 0; i < data.size(); i++) {
+                List<Long> pair=data.get(i);
+                String line=pair.get(0)+","+ pair.get(1);
+                writer.write(line+"\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+package sem2;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+public class Test {
+    public static void main(String[] args) {
+        Random random = new Random();
+        Array arrayTest = new Array();
+        List<Integer> array = arrayTest.createArray();
+        BinomialHeap<Integer> binomialHeap = new BinomialHeap<>();
+
+        List<List<Long>> p3 = performInsertion(10000, binomialHeap, i ->{
+            binomialHeap.insert(array.get(i));
+            return (long)binomialHeap.getOperationCountInsert();
+        });
+
+        List<List<Long>> p4=performInsertion(100,binomialHeap, i -> {
+            binomialHeap.search((array.get(random.nextInt(array.size()))));
+            return (long)binomialHeap.getOperationCountSearch();
+        });
+
+        List<List<Long>> p5=performInsertion(1000, binomialHeap, i
+                -> {int randomInt=random.nextInt(array.size());
+                    BinomialHeap.Node<Integer> node=binomialHeap.search(array.get(randomInt));
+                    array.remove(randomInt);
+                    if (node != null) {
+                        binomialHeap.delete(node);
+                    }
+                    return (long)binomialHeap.getOperationCountDelete();
+        });
+
+        write(p3,"fileP3");//данные о добавлении(1 столбик - время, втрой - кол-во операций)
+        write(p4,"fileP4");//данные о поиске(1 столбик - время, втрой - кол-во операций)
+        write(p5,"fileP5");//данные о удалении(1 столбик - время, втрой - кол-во операций)
+
+        System.out.println(Arrays.toString(getMidle(p3)));//среднее время времени и операций
+        System.out.println(Arrays.toString(getMidle(p4)));//среднее время времени и операций
+        System.out.println(Arrays.toString(getMidle(p5)));//среднее время времени и операций
+    }
+
+    public static List<List<Long>> performInsertion(int count, BinomialHeap<Integer> binomialHeap, Function<Integer, List<Long>> insertionOperation) {
+        List<List<Long>> p = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            long startTime = System.nanoTime();
+            long operationCountInsert=insertionOperation.apply(i);
+            long endTime = System.nanoTime();
+            long Time = endTime - startTime;
+            p.add(List.of(Time, operationCountInsert));
+        }
+        return p;
+    }
+    public static double[] getMidle(List<List<Long>> array){
+        double sumX = 0;
+        double sumY = 0;
+        for (List<Long> pair : array) {
+            sumX += pair.get(0);
+            sumY += pair.get(1);
+        }
+        double midX = sumX / array.size();
+        double midY = sumY / array.size();
+
+        return new double[]{midX, midY};
+    }
+    public static void write(List<List<Long>> data, String file){
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))){
+            for (int i = 0; i < data.size(); i++) {
+                List<Long> pair=data.get(i);
+                String line=pair.get(0)+","+ pair.get(1);
+                writer.write(line+"\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
